@@ -1,5 +1,9 @@
 FROM royseto/pgbuild
 
+# This Dockerfile starts a running PostgreSQL server on port 6543. It assumes
+# that a data volume mounted on /mnt/data/pgsql contains data, config, and log
+# files for PostgreSQL.
+
 # Some parts copied from https://github.com/docker-library/postgres/blob/master/Dockerfile.template
 
 COPY docker-entrypoint.sh /

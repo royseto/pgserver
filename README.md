@@ -1,3 +1,3 @@
-This Dockerfile builds PostgreSQL and PostGIS from source and installs them in /usr/local/pgsql/. It uses an Ubuntu 14.04 base image.
-
-Note that the Docker image does not start a running PostgreSQL service. This should be done on top of this image if desired.
+This Dockerfile starts a running PostgreSQL server on port 6543. It assumes
+that a data volume mounted on /mnt/data/pgsql contains data, config, and log
+files for PostgreSQL.
