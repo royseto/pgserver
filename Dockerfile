@@ -1,12 +1,12 @@
 FROM royseto/pgbuild
 
-# This Dockerfile starts a running PostgreSQL server on port 6543. It assumes
-# that a data volume mounted on /mnt/data/pgsql contains data, config, and log
-# files for PostgreSQL.
+# This Dockerfile starts a running PostgreSQL server on port 6543. It creates a
+# data volume at /mnt/data/pgsql that contains a basic empty database cluster
+# configured for testing but not production (small memory parameters, NOT
+# SECURE). This image can also mount a production database disk at
+# /mnt/data/pgsql that contains suitable production settings.
 
 # Some parts copied from https://github.com/docker-library/postgres/blob/master/Dockerfile.template
-
-COPY docker-entrypoint.sh /
 
 # make the "en_US.UTF-8" locale so postgres will be utf-8 enabled by default
 RUN apt-get update && apt-get install -y locales && rm -rf /var/lib/apt/lists/* \
@@ -29,6 +29,15 @@ RUN set -x \
 
 ENV LD_LIBRARY_PATH /usr/local/pgsql/lib
 ENV PATH /usr/local/pgsql/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+
+COPY . /tmp/setup
+RUN /bin/mkdir -p /mnt/data/pgsql \
+  && /bin/cp /tmp/setup/pg_config/* /mnt/data/pgsql \
+  && /bin/cp /tmp/setup/docker-entrypoint.sh /docker-entrypoint.sh \
+  && /bin/chown -R postgres:postgres /mnt/data/pgsql \
+  && /bin/chmod 755 /docker-entrypoint.sh \
+  && gosu postgres bash -c "LANG=en_US.utf8 /usr/local/pgsql/bin/initdb -D /mnt/data/pgsql -E UTF8" \
+  && /bin/rm -rf /tmp/setup
 
 VOLUME ["/mnt/data/pgsql"]
 EXPOSE 6543
