@@ -31,18 +31,13 @@ RUN set -x \
 ENV LD_LIBRARY_PATH /usr/local/pgsql/lib
 ENV PATH /usr/local/pgsql/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 
-# Create an empty database cluster in /mnt/data/pgsql data volume and copy config files there.
-COPY . /tmp/setup
-RUN /bin/mkdir -p /mnt/data/pgsql \
-  && /bin/chown -R postgres:postgres /mnt/data/pgsql \
-  && /usr/local/bin/gosu postgres bash -c "LANG=en_US.utf8 /usr/local/pgsql/bin/initdb -D /mnt/data/pgsql -E UTF8" \
-  && /bin/cp /tmp/setup/pg_config/* /mnt/data/pgsql \
-  && /bin/cp /tmp/setup/docker-entrypoint.sh /docker-entrypoint.sh \
-  && /bin/chmod 755 /docker-entrypoint.sh \
-  && /bin/rm -rf /tmp/setup
+COPY . /setup
+RUN /bin/cp /setup/docker-entrypoint.sh /docker-entrypoint.sh \
+  && /bin/chmod 755 /docker-entrypoint.sh
 
 VOLUME ["/mnt/data/pgsql"]
 EXPOSE 6543
 
 ENTRYPOINT ["/docker-entrypoint.sh"]
 CMD ["postgres"]
+
